@@ -4,8 +4,9 @@
   "description": "Microsserviço para gerenciar a produção de pedidos da lanchonete.",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "swagger": "node swagger.js"
+    "start": "node index.js",
+    "swagger": "node swagger.js",
+    "test": "jest --coverage"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +18,10 @@
     "mongodb": "^6.3.0",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^9.1.1",
+    "supertest": "^6.3.3"
   }
 }
