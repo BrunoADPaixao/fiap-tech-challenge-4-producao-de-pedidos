@@ -1,0 +1,23 @@
+# docker-compose.yml
+
+services:
+  # Serviço da nossa aplicação Node.js
+  app:
+    build: .
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+
+  # Serviço do banco de dados MongoDB
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
