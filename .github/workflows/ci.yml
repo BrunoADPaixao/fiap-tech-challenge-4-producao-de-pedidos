@@ -14,13 +14,12 @@ jobs:
 
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          # Precisamos de um fetch mais profundo para uma análise correta do SonarCloud
           fetch-depth: 0
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "npm"
@@ -33,14 +32,9 @@ jobs:
         env:
           MONGO_URI: "mongodb://localhost:27017/testdb"
 
-      # --- NOVO PASSO ADICIONADO ---
-      # Este passo envia os resultados para o SonarCloud
       - name: Análise SonarCloud
-        # Roda este passo apenas se o evento não for de um fork (por segurança)
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@v2.2.0
         env:
-          # Token que configuramos nos segredos do GitHub
           SONAR_TOKEN: ${{ secrets.SONAR_SECURITY_TOKEN }}
-          # Segredo padrão do GitHub Actions, não precisa configurar
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
