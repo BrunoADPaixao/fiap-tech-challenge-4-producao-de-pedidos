@@ -6,10 +6,10 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
 const { MongoClient } = require("mongodb");
 
 // Importar as rotas que queremos testar
-const producaoRoutes = require("../routes/producaoRoutes");
+const producaoRoutes = require("../src/routes/producaoRoutes");
 
 // Precisamos mockar nosso módulo de DB para usar o banco em memória
-jest.mock("../config/db", () => ({
+jest.mock("../src/config/db", () => ({
   getDB: () => global.db,
   connectDB: jest.fn(),
 }));
