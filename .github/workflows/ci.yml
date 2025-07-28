@@ -2,38 +2,39 @@
 
 name: Pipeline de CI para Microsserviço de Produção
 
-# Define os gatilhos (triggers) que iniciam a pipeline
 on:
   push:
-    branches: [main] # Roda quando há um push na branch main
+    branches: [main]
   pull_request:
-    branches: [main] # Roda quando um Pull Request é aberto para a main
+    branches: [main]
 
 jobs:
-  # Define um "job" (trabalho) chamado "build-e-test"
   build-e-test:
-    # Define o tipo de máquina virtual que será usada para rodar o job
     runs-on: ubuntu-latest
 
     steps:
-      # Passo 1: Clona o seu repositório para dentro da máquina virtual
       - name: Checkout do código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Passo 2: Configura o ambiente Node.js na versão 18
       - name: Configurar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "npm" # Habilita o cache para acelerar a instalação de dependências
+          cache: "npm"
 
-      # Passo 3: Instala todas as dependências do projeto
       - name: Instalar dependências
         run: npm install
 
-      # Passo 4: Roda os testes (e a verificação de cobertura)
-      # O comando "npm test" já está configurado no seu package.json para rodar "jest --coverage"
       - name: Rodar testes
         run: npm test
         env:
           MONGO_URI: "mongodb://localhost:27017/testdb"
+
+      - name: Análise SonarCloud
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: SonarSource/sonarcloud-github-action@v2.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_SECURITY_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
