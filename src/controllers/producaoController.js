@@ -1,4 +1,3 @@
-// controllers/producaoController.js
 const { getDB } = require("../config/db");
 const { ObjectId } = require("mongodb");
 
@@ -40,12 +39,10 @@ exports.criarPedido = async (req, res) => {
 
     // Validação básica para o novo contrato
     if (!cliente_id || !itens || !Array.isArray(itens) || itens.length === 0) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Dados do pedido inválidos. 'cliente_id' e 'itens' são obrigatórios.",
-        });
+      return res.status(400).json({
+        message:
+          "Dados do pedido inválidos. 'cliente_id' e 'itens' são obrigatórios.",
+      });
     }
 
     const novoPedido = {
@@ -56,19 +53,15 @@ exports.criarPedido = async (req, res) => {
     };
 
     const result = await db.collection("pedidos").insertOne(novoPedido);
-    res
-      .status(201)
-      .json({
-        message: "Pedido recebido na produção com sucesso!",
-        insertedId: result.insertedId,
-      });
+    res.status(201).json({
+      message: "Pedido recebido na produção com sucesso!",
+      insertedId: result.insertedId,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Erro ao criar o pedido na produção.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Erro ao criar o pedido na produção.",
+      error: error.message,
+    });
   }
 };
 
@@ -85,12 +78,10 @@ exports.listarFila = async (req, res) => {
       .toArray();
     res.status(200).json(fila);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Erro ao buscar a fila de pedidos.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Erro ao buscar a fila de pedidos.",
+      error: error.message,
+    });
   }
 };
 
@@ -104,12 +95,10 @@ exports.listarTodos = async (req, res) => {
     const pedidos = await db.collection("pedidos").find({}).toArray();
     res.status(200).json(pedidos);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Erro ao buscar todos os pedidos.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Erro ao buscar todos os pedidos.",
+      error: error.message,
+    });
   }
 };
 
@@ -145,13 +134,11 @@ exports.atualizarStatus = async (req, res) => {
     }
 
     if (!status || !STATUS_VALIDOS.includes(status)) {
-      return res
-        .status(400)
-        .json({
-          message: `Status inválido. Use um dos seguintes: ${STATUS_VALIDOS.join(
-            ", "
-          )}`,
-        });
+      return res.status(400).json({
+        message: `Status inválido. Use um dos seguintes: ${STATUS_VALIDOS.join(
+          ", "
+        )}`,
+      });
     }
 
     const result = await db
@@ -168,11 +155,9 @@ exports.atualizarStatus = async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Erro ao atualizar o status do pedido.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Erro ao atualizar o status do pedido.",
+      error: error.message,
+    });
   }
 };

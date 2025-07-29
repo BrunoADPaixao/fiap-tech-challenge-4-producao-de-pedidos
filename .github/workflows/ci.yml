@@ -1,6 +1,4 @@
-# .github/workflows/ci.yml
-
-name: Pipeline de CI para Microsserviço de Produção
+name: Pipeline de CI/CD para Microsserviço de Produção
 
 on:
   push:
@@ -8,10 +6,19 @@ on:
   pull_request:
     branches: [main]
 
-jobs:
-  build-e-test:
-    runs-on: ubuntu-latest
+# Variáveis de ambiente globais para a pipeline
+env:
+  AWS_REGION: us-east-2 # Mude se sua região for outra
+  ECR_REPOSITORY: microsservico-producao-repo # Nome do seu repositório ECR
+  ECS_CLUSTER_NAME: microsservico-producao-cluster # Nome do seu cluster ECS
+  ECS_SERVICE_NAME: microsservico-producao-service # Nome do seu serviço ECS
+  PROJECT_NAME: microsservico-producao # Nome do projeto usado no Terraform
 
+jobs:
+  # Job 1: Construir, testar e analisar o código
+  build-e-test:
+    name: Build, Teste e Análise
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -27,7 +34,7 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Rodar testes
+      - name: Rodar testes e gerar cobertura
         run: npm test
         env:
           MONGO_URI: "mongodb://localhost:27017/testdb"
@@ -39,26 +46,55 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_SECURITY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Job para construir e publicar a imagem Docker
+  # Job 2: Fazer o deploy na AWS
   deploy:
+    name: Deploy na AWS
     # Garante que este job só rode se o de build-e-test passar
     needs: build-e-test
     # Roda apenas em pushes para a branch main, não em Pull Requests
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Login no Docker Hub
-        uses: docker/login-action@v3
+      - name: Configurar credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Construir e publicar a imagem Docker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: brunoadpaixao/fiap-tech-challenge-4-producao-de-pedidos
+      - name: Login no Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Construir, taguear e publicar imagem no ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Rodar Terraform para implantar a infraestrutura
+        env:
+          TF_VAR_mongo_uri: ${{ secrets.MONGO_URI }}
+        run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Forçar novo deploy no serviço ECS
+        run: |
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER_NAME }} --service ${{ env.ECS_SERVICE_NAME }} --force-new-deployment
