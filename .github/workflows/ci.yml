@@ -6,13 +6,11 @@ on:
   pull_request:
     branches: [main]
 
-# Variáveis de ambiente globais para a pipeline
 env:
-  AWS_REGION: us-east-2 # Mude se sua região for outra
-  ECR_REPOSITORY: microsservico-producao-repo # Nome do seu repositório ECR
-  ECS_CLUSTER_NAME: microsservico-producao-cluster # Nome do seu cluster ECS
-  ECS_SERVICE_NAME: microsservico-producao-service # Nome do seu serviço ECS
-  PROJECT_NAME: microsservico-producao # Nome do projeto usado no Terraform
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: microsservico-producao-repo
+  ECS_CLUSTER_NAME: microsservico-producao-cluster
+  ECS_SERVICE_NAME: microsservico-producao-service
 
 jobs:
   # Job 1: Construir, testar e analisar o código
@@ -49,15 +47,15 @@ jobs:
   # Job 2: Fazer o deploy na AWS
   deploy:
     name: Deploy na AWS
-    # Garante que este job só rode se o de build-e-test passar
     needs: build-e-test
-    # Roda apenas em pushes para a branch main, não em Pull Requests
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       id-token: write
+
+    env:
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout do código
@@ -78,11 +76,9 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
@@ -90,8 +86,7 @@ jobs:
       - name: Rodar Terraform para implantar a infraestrutura
         env:
           TF_VAR_mongo_uri: ${{ secrets.MONGO_URI }}
-          # Passa a tag da imagem (o hash do commit) para a variável image_tag do Terraform
-          TF_VAR_image_tag: ${{ steps.build-image.outputs.image_tag_output }}
+          TF_VAR_image_tag: ${{ env.IMAGE_TAG }}
         run: |
           cd terraform
           terraform init
