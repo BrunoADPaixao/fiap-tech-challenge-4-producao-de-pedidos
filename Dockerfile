@@ -1,5 +1,3 @@
-# Dockerfile
-
 # Usa uma imagem base oficial do Node.js
 FROM node:18-alpine
 
