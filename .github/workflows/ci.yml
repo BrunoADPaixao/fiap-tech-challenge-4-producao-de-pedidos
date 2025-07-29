@@ -90,6 +90,8 @@ jobs:
       - name: Rodar Terraform para implantar a infraestrutura
         env:
           TF_VAR_mongo_uri: ${{ secrets.MONGO_URI }}
+          # Passa a tag da imagem (o hash do commit) para a variável image_tag do Terraform
+          TF_VAR_image_tag: ${{ steps.build-image.outputs.image_tag_output }}
         run: |
           cd terraform
           terraform init
