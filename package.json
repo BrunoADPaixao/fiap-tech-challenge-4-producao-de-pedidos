@@ -4,6 +4,7 @@
   "description": "Microsserviço para gerenciar a produção de pedidos da lanchonete.",
   "main": "index.js",
   "scripts": {
+    "prestart": "node swagger.js",
     "start": "node src/index.js",
     "swagger": "node swagger.js",
     "test": "jest --coverage",
