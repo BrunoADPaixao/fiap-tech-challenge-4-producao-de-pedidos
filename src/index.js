@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const swaggerUi = require("swagger-ui-express");
+
 const swaggerFile = require("../swagger-output.json");
 const producaoRoutes = require("./routes/producaoRoutes");
 const { connectDB } = require("./config/db");
@@ -8,10 +9,8 @@ const { connectDB } = require("./config/db");
 const app = express();
 const PORT = 3002;
 
-// Conecta ao banco de dados e então inicia o servidor
 connectDB()
   .then(() => {
-    // Middlewares
     app.use(bodyParser.json());
 
     // Rotas da API
@@ -20,7 +19,6 @@ connectDB()
     // Rota da documentação Swagger
     app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-    // Endpoint raiz
     app.get("/", (req, res) => {
       // #swagger.ignore = true
       res.send(
@@ -36,3 +34,5 @@ connectDB()
   .catch((err) => {
     console.error("Falha ao iniciar o servidor", err);
   });
+
+module.exports = app;

@@ -11,6 +11,7 @@ const doc = {
 };
 
 const outputFile = "./swagger-output.json";
-const endpointsFiles = ["./src/index.js"]; // Apontar para o arquivo que define as rotas
+
+const endpointsFiles = ["./src/index.js", "./src/routes/producaoRoutes.js"];
 
 swaggerAutogen(outputFile, endpointsFiles, doc);
