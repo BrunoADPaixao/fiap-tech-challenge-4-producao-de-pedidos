@@ -13,5 +13,11 @@ variable "project_name" {
 variable "mongo_uri" {
   description = "A string de conexão para o MongoDB Atlas."
   type        = string
-  sensitive   = true # Marca como sensível para não exibir nos logs.
+  sensitive   = true
+}
+
+variable "image_tag" {
+  description = "A tag da imagem Docker a ser implantada"
+  type        = string
+  default     = "latest"
 }

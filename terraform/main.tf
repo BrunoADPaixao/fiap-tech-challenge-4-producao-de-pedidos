@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "app_task" {
     {
       name      = var.project_name
       # A imagem será preenchida pela nossa pipeline de CI/CD.
-      image     = "${aws_ecr_repository.app_ecr_repo.repository_url}:latest"
+      image     = "${aws_ecr_repository.app_ecr_repo.repository_url}:${var.image_tag}"
       essential = true
       portMappings = [
         {
