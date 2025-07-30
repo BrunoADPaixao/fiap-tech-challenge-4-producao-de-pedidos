@@ -56,3 +56,9 @@ Desktop.ini
 
 /dist
 /build
+
+
+### Arquivos Gerados ###
+# Documentação da API gerada automaticamente pelo Swagger.
+# Este arquivo não deve ser versionado.
+/swagger-output.json
