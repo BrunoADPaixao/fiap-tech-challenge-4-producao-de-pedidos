@@ -1,7 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const swaggerUi = require("swagger-ui-express");
-const cors = require("cors");
+const cors = require("cors"); // Importa o pacote cors
+
 const swaggerFile = require("../swagger-output.json");
 const producaoRoutes = require("./routes/producaoRoutes");
 const { connectDB } = require("./config/db");
@@ -11,7 +12,14 @@ const PORT = 3002;
 
 connectDB()
   .then(() => {
-    app.use(cors());
+    app.use(
+      cors({
+        origin: "*",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+      })
+    );
 
     app.use(bodyParser.json());
     // Rotas da API
