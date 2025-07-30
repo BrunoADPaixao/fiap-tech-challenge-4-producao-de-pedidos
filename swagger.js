@@ -6,7 +6,7 @@ const doc = {
     description:
       "API para gerenciar o fluxo de preparação de pedidos na cozinha.",
   },
-  host: "localhost:3002",
+  // host: "localhost:3002",
   basePath: "/pedidos",
   schemes: ["http"],
 };
