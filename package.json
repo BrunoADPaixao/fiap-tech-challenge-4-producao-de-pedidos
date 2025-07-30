@@ -1,11 +1,11 @@
 {
   "name": "microsservico-producao",
   "version": "1.0.0",
-  "description": "Microsserviço para gerenciar a produção de pedidos da lanchonete.",
+  "description": "Microsservi\u00e7o para gerenciar a produ\u00e7\u00e3o de pedidos da lanchonete.",
   "main": "index.js",
   "scripts": {
     "prestart": "node swagger.js",
-    "start": "node src/index.js",
+    "start": "node api.js && node src/index.js",
     "swagger": "node swagger.js",
     "test": "jest --coverage",
     "docker-build": "docker-compose up --build"
@@ -16,7 +16,6 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
     "swagger-autogen": "^2.23.7",

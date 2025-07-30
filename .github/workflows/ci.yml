@@ -13,7 +13,7 @@ env:
   ECS_SERVICE_NAME: microsservico-producao-service
 
 jobs:
-  # Job 1: Construir, testar e analisar o código
+  # Job 1: Construir, testar, analisar e salvar o artefato
   build-e-test:
     name: Build, Teste e Análise
     runs-on: ubuntu-latest
@@ -47,6 +47,13 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_SECURITY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Salva o swagger-output.json como um artefato para o próximo job usar
+      - name: Upload do Artefato Swagger
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-json
+          path: swagger-output.json
+
   # Job 2: Fazer o deploy na AWS
   deploy:
     name: Deploy na AWS
@@ -63,6 +70,12 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+
+      # Baixa o artefato salvo do job anterior para a pasta atual
+      - name: Download do Artefato Swagger
+        uses: actions/download-artifact@v4
+        with:
+          name: swagger-json
 
       - name: Configurar credenciais da AWS
         uses: aws-actions/configure-aws-credentials@v4
